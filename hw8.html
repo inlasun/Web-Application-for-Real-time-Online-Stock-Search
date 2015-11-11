@@ -1,0 +1,297 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/> 
+<style type="text/css">
+.content
+{
+margin-left:;
+margin-right:auto;
+width:1150px;
+}
+
+#headline
+{
+height:200px;
+margin-top:50px;
+}
+
+#stock
+{
+margin-left:10%;
+margin-right:10%;
+width:1200px;
+}
+
+.line
+{
+width:1200px;
+border-left:none;
+border-right:none;
+color:white;
+margin-top:30px;
+margin-bottom:30px;
+margin-left:auto;
+margin-right:auto;
+
+}
+
+body {
+ background-image: url(https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcTUmJPrI7NnX5qsp0dZpWO3Je0B4VjMeBTopJkFRPavv2-9sQ_4);
+ background-repeat: no-repeat;
+ background-size:1800px 1600px;
+ font-family:arial;
+}
+#main
+{
+margin-left:auto;
+margin-right:auto;
+width:80%;
+
+}
+#info
+{
+margin-left:auto;
+margin-right:auto;
+width:1200px;
+}
+
+.headline1
+{
+font-size:30px;
+color:white;
+margin-bottom:0px;
+}
+.headline2
+{
+margin-top:0px;
+}
+.headline3
+{
+font-size:50px;
+color:white;
+}
+a:link    {color:black;}
+a:visited {color:black;}
+</style>
+<script type="text/javascript"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script src="http://yui.yahooapis.com/3.16.0/build/yui/yui-min.js"></script>
+ <script>
+// Create a YUI sandbox on your page.
+YUI().use('node', 'event', function (Y) {
+    // The Node and Event modules are loaded and ready to use.
+    // Your code goes here!
+});
+
+window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '243503292507926',//
+          status     : true,
+          xfbml      : true
+        });
+     FB.Event.subscribe('auth.authResponseChange', function(response) {
+    if (response.status === 'connected') {
+      console.log('Logged in');
+    } else {
+      FB.login();
+    }
+  });  };
+  (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.async = true;
+         js.src = "//connect.facebook.net/en_US/all.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, 'script', 'facebook-jssdk'));
+	   
+function facebook()
+{
+/*again for log in*/
+FB.Event.subscribe('auth.authResponseChange', function(response) {
+    if (response.status === 'connected') {
+      console.log('Logged in');
+    } else {
+      FB.login();
+    }
+  });
+  
+  change=ChangeType;
+  change+=Change;
+  
+    FB.ui(
+  {
+    method: 'feed',
+    name: Name,
+    link: 'http://finance.yahoo.com/q;_ylt=AmR7Fknz43VakAz4XiSr9aiiuYdG;_ylu=X3oDMTBxdGVyNzJxBHNlYwNVSCAzIERlc2t0b3AgU2VhcmNoIDEx;_ylg=X3oDMTBsdWsyY2FpBGxhbmcDZW4tVVMEcHQDMgR0ZXN0Aw--;_ylv=3?uhb=uhb2&fr=uh3_finance_vert_gs&type=2button&s='+Symbol,
+    picture: 'http://chart.finance.yahoo.com/t?s='+Symbol+'&lang=en-US&amp;',
+    caption: 'Stock Information of '+Name+'('+Symbol+')',
+	description: ('Last Trade Price: '+LastTradePriceOnly+', Change: '+change+'('+ChangeInPercent +'%)')
+	
+
+  },
+  function(response) {
+    if (response && response.post_id) {
+      alert('Post was published.');
+    } else {
+      alert('Post was not published.');
+    }
+  }
+);
+}	   
+
+
+</script>
+<script>
+/*Search button*/
+$(document).ready(function(){
+  $("#search").click(function(){
+   content();
+ 
+ });
+});
+
+
+var YAHOO={Finance:{SymbolSuggest:{}}};
+YUI().use('autocomplete', 'autocomplete-highlighters', function (Y) 
+{
+  Y.one('#input').plug(Y.Plugin.AutoComplete, 
+  {
+    resultFilters: 'phraseMatch',
+    resultHighlighter: 'phraseMatch',
+    activateFirstItem:true,
+    resultTextLocator: function (input) 
+    {
+    return input.symbol+","+input.name+"("+input.exch+")";
+    },
+    source: function (query, callback) 
+    { 
+         $.ajax({
+                 type: "GET",
+                 url: "http://autoc.finance.yahoo.com/autoc",
+                 data: {query: query},
+                 dataType: "jsonp",
+                 jsonp : "callback",
+                 jsonpCallback: "YAHOO.Finance.SymbolSuggest.ssCallback",
+                });
+         YAHOO.Finance.SymbolSuggest.ssCallback = function (data) 
+         {
+			callback(data.ResultSet.Result);
+         }             
+     }
+  }); 
+  
+ var input=Y.one("#input");
+ input.ac.after('select', function() 
+ {
+    content();  
+  });
+});
+
+function content()
+{
+  $.getJSON("http://cs-server.usc.edu:33287/examples/servlet/jservlet?symbol="+document.getElementById("input").value.split(",")[0],function(data) 
+   {
+    /*headline div*/
+   $("#info").html("");
+   $("#headline").html("");
+   $("#line1").html("");
+    var string=null;
+    if(document.getElementById("input").value.length==0)
+    {
+       alert("Please enter company symbol");
+    }
+    else
+    {
+ 		if(data.Quote.LastTradePriceOnly=="0.00")
+    	{
+    	$("#headline").html("<div style='margin-left:auto;margin-right:auto;margin-top:200px;width:40%;color:white;font-size:30px;text-align=center;'><b>Stock Information not found!</b></div>");
+    	}
+   		else
+    	{
+   		 	Name=data.Name;
+    		Symbol=data.Symbol;
+    		LastTradePriceOnly=data.Quote.LastTradePriceOnly;
+    		ChangeType=data.Quote.ChangeType;
+    		Change=data.Quote.Change;
+    		ChangeInPercent=data.Quote.ChangeInPercent;
+    		string="<span style='width:700px;'><p class='headline1'><b>"+data.Name+"("+data.Symbol+")</b></p><p class='headline2'><span class='headline3'>"+data.Quote.LastTradePriceOnly+"</span>";
+    		if(parseInt(data.Quote.Change)>0)
+    		{
+				string+="<span style='color:green;font-size:30px;'><img src=http://www-scf.usc.edu/~csci571/2014Spring/hw6/up_g.gif></img>"+data.Quote.Change+"("+data.Quote.ChangeInPercent+"%)</span></p>";
+			}
+    		else
+    		{
+     			string+="<span style='color:red; font-size:30px;'><img src=http://www-scf.usc.edu/~csci571/2014Spring/hw6/down_r.gif></img>"+data.Quote.Change+"("+data.Quote.ChangeInPercent+"%)</span></p>";
+    		}
+    		string+="<button style='background-image:url(facebook.png);background-size:100%,100%;height:23px;width:55px;border-top:0px;border-left:0px;border-bottom:0px;border-right:0px;' type='button' onclick='facebook()'></button>";
+    		string+="</span><span style='float:right;  margin-top:-110px;'><img src="+data.StockChartImageURL+"></img></span>";
+    		$("#headline").append(string);
+    
+    		var line="<hr class='line'/>";
+    		$("#line1").append(line);
+    
+    		/*info div*/
+			/*tabview*/
+			var newss="";
+			
+ 				if(data.News.length>1)
+ 				{
+ 				$.each(data.News,function(i){
+ 				
+  				newss+="<li><a href='"+data.News[i].Link+"'>"+data.News[i].Title+"</a></li>";
+  				
+  				});
+  				}
+  				else
+  				{
+  			
+ 				newss+="News Information Not Available";
+ 				
+  				}
+  			
+  			var stock="";
+  			stock="<table class='content'><tr><td align=left>Prev Close:</td><td align=right>"+data.Quote.PreviousClose+"</td><td text-align='center'>Day's Range:</td><td align=right>"+data.Quote.DaysLow+"-"+data.Quote.DaysHigh+"</td></tr><tr><td align=left>Open:</td><td align=right>"+data.Quote.Open+"</td><td text-align='center'>52wk Range:</td><td align=right>"+data.Quote.YearLow+"-"+data.Quote.YearHigh+"</td></tr><tr><td align=left>Bid:</td><td align=right>"+data.Quote.Bid+"</td><td text-align='center'>Volume:</td><td align=right>"+data.Quote.Volume+"</td></tr><tr><td align=left>Ask:</td><td align=right>"+data.Quote.Ask+"</td><td text-align='center'>Avg Vol(3m):</td><td align=right>"+data.Quote.AverageDailyVolume+"</td></tr><tr><td align=left>1y Target Est:</td><td align=right>"+data.Quote.OneYearTargetPrice+"</td><td text-align='center'>Market Cap:</td><td align=right>"+data.Quote.MarketCapitalization+"</td></tr></table>";
+ 
+
+			YUI().use('tabview', function (Y) 
+ 			{
+   				var tabview = new Y.TabView(
+   				{
+   				children:[
+   				{
+   				label:'Quote Information',
+   				content: stock },
+   				{
+   				label:'News Headlines',
+  				content:newss 
+  				}]
+   			}
+   			);  
+    tabview.render('#info');
+   
+   });
+         }
+	}
+  });
+
+}
+</script>
+
+</head>
+<body  class="yui3-skin-sam">
+<div id="fb-root"></div>
+<div style="width:1500px; height:1500px;">
+<div id="main" >
+<span style="color:white;font-family:arial;font-size:16px;">Company:</span>
+&nbsp;<span><input type="text" style="width:800px;height:25px;" id="input" name="symbol"></input>&nbsp;&nbsp;<input style="height:25px;width:60px;font-size:12px;font-family:arial;" type="submit" name="submit" id="search" value="Search"></input>
+</span>
+</div>
+<div id="stock">
+<div id="headline"></div>
+<div id="line1"></div>
+<div id="info"></div>
+</div>
+</div>
+</body>
+</html>
